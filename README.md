@@ -14,7 +14,16 @@ An autonomous data pipeline that scrapes the complete daily transaction floorshe
 - **Automated Execution**: Runs automatically every trading day (Sunday to Thursday) at **3:36 PM NPT** (09:51 UTC) via GitHub Actions.
 - **Dynamic Reverse-Engineered Handshake**: Solves NEPSE's dynamic `Salter` token and calculated daily payload ID automatically without requiring external browser automation.
 - **Dedicated Daily Archiving**: Saves the full day's transactions in `Floorsheet/<YYYY-MM-DD>.csv`.
+- **In-Depth Technical Documentation**: Full reverse-engineering writeup available in [`ReverseEngineering.md`](ReverseEngineering.md).
 - **Manual Trigger**: Supports the `workflow_dispatch` trigger, allowing you to trigger a scrape anytime from the GitHub Actions web interface.
+
+---
+
+## 🕵️ Reverse-Engineering Deep Dive
+
+Curious about how we bypassed the `WARNING: UNAUTHORIZED ACCESS` error, reverse-engineered the `css.wasm` WebAssembly module, and cracked the Angular payload calculation?
+
+👉 **Read the full step-by-step breakdown in [`ReverseEngineering.md`](ReverseEngineering.md).**
 
 ---
 
@@ -31,6 +40,7 @@ An autonomous data pipeline that scrapes the complete daily transaction floorshe
 ├── scrape_daily.py              # Automated execution entry point for GitHub Actions
 ├── requirements.txt             # Python dependencies
 ├── .gitignore                   # Standard Python ignores
+├── ReverseEngineering.md        # Complete reverse-engineering writeup and investigation
 └── README.md                    # Project documentation
 ```
 
