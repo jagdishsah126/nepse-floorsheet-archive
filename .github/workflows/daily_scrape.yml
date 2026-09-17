@@ -1,0 +1,53 @@
+name: Daily NEPSE Floorsheet Scraper
+
+on:
+  schedule:
+    # 09:51 UTC corresponds to 15:36 NPT (Nepal Time = UTC + 5:45)
+    # Runs Sunday to Thursday (0-4), the official NEPSE trading days
+    - cron: '51 9 * * 0-4'
+  workflow_dispatch:
+    # Allows manual trigger anytime from GitHub Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  scrape-and-commit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: 📦 Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: 📊 Execute Daily Scraper
+        run: |
+          python scrape_daily.py
+
+      - name: 🚀 Commit and Push Floorsheet
+        run: |
+          git config --local user.email "foreverzaraa@gmail.com"
+          git config --local user.name "Your Zara"
+          
+          # Stage new files in Floorsheet/
+          git add Floorsheet/
+          
+          # Check if there are changes staged
+          if git diff --staged --quiet; then
+            echo "ℹ️ No new floorsheet data to commit for today."
+          else
+            TODAY=$(TZ="Asia/Kathmandu" date +'%Y-%m-%d')
+            git commit -m "📊 Daily Floorsheet Backup: ${TODAY} 🚀 [skip ci]"
+            git push
+            echo "✅ Successfully committed and pushed today's floorsheet!"
+          fi
