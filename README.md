@@ -19,6 +19,53 @@ An autonomous data pipeline that scrapes the complete daily transaction floorshe
 
 ---
 
+## 📊 How to Access Daily Floorsheet Data Directly
+
+You do not need to clone the repository or manually download files to use this data. Every daily CSV is publicly available and can be loaded directly into any data analysis environment (Python Pandas, Jupyter Notebook, Google Colab, R, Excel, or Bash).
+
+### 1. Direct Raw URL Format
+Every trading day's CSV file is hosted at a permanent URL:
+```text
+https://raw.githubusercontent.com/jagdishsah126/nepse-floorsheet-archive/main/Floorsheet/<YYYY-MM-DD>.csv
+```
+*(Example: `https://raw.githubusercontent.com/jagdishsah126/nepse-floorsheet-archive/main/Floorsheet/2026-09-17.csv`)*
+
+### 2. One-Line Python (Pandas / Jupyter / Colab)
+Load any trading day directly into memory:
+```python
+import pandas as pd
+
+# Specify any target trading date (YYYY-MM-DD)
+date = "2026-09-17"
+url = f"https://raw.githubusercontent.com/jagdishsah126/nepse-floorsheet-archive/main/Floorsheet/{date}.csv"
+
+df = pd.read_csv(url)
+print(f"Loaded {len(df):,} transactions for {date}:")
+print(df.head())
+```
+
+### 3. Direct Download via Terminal (`curl` / `wget`)
+```bash
+# Download a specific date's floorsheet
+curl -O https://raw.githubusercontent.com/jagdishsah126/nepse-floorsheet-archive/main/Floorsheet/2026-09-17.csv
+
+# Or using wget
+wget https://raw.githubusercontent.com/jagdishsah126/nepse-floorsheet-archive/main/Floorsheet/2026-09-17.csv
+```
+
+### 4. Load All Historical Dates Combined
+Merge every archived day into a single time-series DataFrame:
+```python
+import glob
+import pandas as pd
+
+# If you have the repo locally, combine all archived dates:
+all_files = glob.glob("Floorsheet/*.csv")
+master_df = pd.concat([pd.read_csv(f) for f in all_files], ignore_index=True)
+print(f"Total Historical Records: {len(master_df):,} across {len(all_files)} days")
+```
+
+
 ## 🕵️ Reverse-Engineering Deep Dive
 
 Curious about how we bypassed the `WARNING: UNAUTHORIZED ACCESS` error, reverse-engineered the `css.wasm` WebAssembly module, and cracked the Angular payload calculation?
