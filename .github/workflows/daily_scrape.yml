@@ -3,8 +3,8 @@ name: Daily NEPSE Floorsheet Scraper
 on:
   schedule:
     # 09:51 UTC corresponds to 15:36 NPT (Nepal Time = UTC + 5:45)
-    # Runs Sunday to Thursday (0-4), the official NEPSE trading days
-    - cron: '51 9 * * 0-4'
+    # Runs monday to friday (1-5), the official NEPSE trading days
+    - cron: '51 9 * * 1-5'
   workflow_dispatch:
     # Allows manual trigger anytime from GitHub Actions tab
 
