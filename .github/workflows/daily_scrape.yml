@@ -51,3 +51,27 @@ jobs:
             git push
             echo "✅ Successfully committed and pushed today's floorsheet!"
           fi
+
+      - name: 🧾 Build Broker Summary
+        run: |
+          TODAY=$(TZ="Asia/Kathmandu" date +'%Y-%m-%d')
+          if [ -f "Floorsheet/${TODAY}.csv" ]; then
+            python DailySummary.py --date "${TODAY}"
+          else
+            echo "ℹ️ No floorsheet for ${TODAY}; skipping broker summary."
+          fi
+
+      - name: 🚀 Commit and Push Summary
+        run: |
+          # Stage generated broker summaries
+          git add Summary/
+
+          if git diff --staged --quiet; then
+            echo "ℹ️ No new broker summary data to commit for today."
+          else
+            TODAY=$(TZ="Asia/Kathmandu" date +'%Y-%m-%d')
+            git commit -m "📈 Daily Broker Summary: ${TODAY} [skip ci]"
+            git push
+            echo "✅ Successfully committed and pushed today's broker summary!"
+          fi
+
