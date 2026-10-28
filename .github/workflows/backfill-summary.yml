@@ -1,0 +1,88 @@
+name: Backfill Broker Summaries
+
+on:
+  workflow_dispatch:
+    # Manually trigger from the Actions tab to fill missing Summary files
+
+permissions:
+  contents: write
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 🔍 Find and Build Missing Summaries
+        id: backfill
+        run: |
+          missing=()
+          total=0
+
+          for file in Floorsheet/*.csv; do
+            [ -e "$file" ] || continue
+            day=$(basename "$file" .csv)
+
+            # Only process YYYY-MM-DD.csv files
+            if ! [[ "$day" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
+              echo "⚠️ Skipping non-date file: $file"
+              continue
+            fi
+
+            total=$((total + 1))
+            if [ ! -f "Summary/${day}_brokers.csv" ] || [ ! -f "Summary/${day}_broker_totals.csv" ]; then
+              missing+=("$day")
+            fi
+          done
+
+          echo "📊 Floorsheet files: ${total}"
+          echo "📉 Missing summaries: ${#missing[@]}"
+
+          if [ ${#missing[@]} -eq 0 ]; then
+            echo "✅ Nothing to backfill."
+            exit 0
+          fi
+
+          echo "🗓️ Dates: ${missing[*]}"
+
+          failed=()
+          for day in "${missing[@]}"; do
+            echo "🧾 Building summary for ${day}..."
+            if ! python DailySummary.py --date "$day"; then
+              echo "❌ Failed: ${day}"
+              failed+=("$day")
+            fi
+          done
+
+          if [ ${#failed[@]} -gt 0 ]; then
+            echo "failed=${failed[*]}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: 🚀 Commit and Push Summaries
+        run: |
+          git config --local user.email "foreverzaraa@gmail.com"
+          git config --local user.name "Your Zara"
+
+          git add Summary/
+
+          if git diff --staged --quiet; then
+            echo "ℹ️ No missing summaries to commit."
+          else
+            git commit -m "📈 Backfill Broker Summaries [skip ci]"
+            git push
+            echo "✅ Backfill committed and pushed."
+          fi
+
+      - name: ❌ Fail if Any Day Failed
+        if: steps.backfill.outputs.failed != ''
+        run: |
+          echo "Backfill failed for: ${{ steps.backfill.outputs.failed }}"
+          exit 1
