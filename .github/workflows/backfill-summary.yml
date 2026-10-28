@@ -25,6 +25,7 @@ jobs:
         id: backfill
         run: |
           missing=()
+          invalid=()
           total=0
 
           for file in Floorsheet/*.csv; do
@@ -38,13 +39,26 @@ jobs:
             fi
 
             total=$((total + 1))
+
+            # Validate the CSV header before treating the file as processable
+            if ! python3 -c 'import csv,sys; from DailySummary import REQUIRED_COLUMNS as R; fh=open(sys.argv[1],encoding="utf-8-sig",newline=""); h=next(csv.reader(fh),[]); sys.exit(0 if R.issubset(h) else 1)' "$file"; then
+              echo "⚠️ Invalid floorsheet, skipping: $file"
+              invalid+=("$day")
+              continue
+            fi
+
             if [ ! -f "Summary/${day}_brokers.csv" ] || [ ! -f "Summary/${day}_broker_totals.csv" ]; then
               missing+=("$day")
             fi
           done
 
           echo "📊 Floorsheet files: ${total}"
+          echo "⚠️ Invalid floorsheets: ${#invalid[@]}"
           echo "📉 Missing summaries: ${#missing[@]}"
+
+          if [ ${#invalid[@]} -gt 0 ]; then
+            echo "::warning::Skipped invalid floorsheet(s): ${invalid[*]}"
+          fi
 
           if [ ${#missing[@]} -eq 0 ]; then
             echo "✅ Nothing to backfill."
