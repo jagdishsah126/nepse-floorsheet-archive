@@ -180,4 +180,6 @@ The CSV will be generated inside the `Floorsheet/` directory with today's date.
   Underlying market data remains © NEPSE; this archive claims no ownership.
 - Independent open-source project — **not** affiliated with, endorsed by, or authorized by
   NEPSE, SEBON, or any broker. Names are used nominatively, to identify the data source only.
+- Pipeline **code** is MIT-licensed — see [`LICENSE`](LICENSE); the market **data** itself
+  is not re-licensed and is governed by the attribution terms above and in `NOTICE.md`.
 - Full details — source, purpose, removal/correction requests — in [`NOTICE.md`](NOTICE.md).

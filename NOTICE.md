@@ -23,7 +23,10 @@ No data here is fabricated, estimated or combined from third-party vendors.
 - **The underlying market data remains the property of Nepal Stock Exchange Limited (NEPSE).**
   This repository claims no ownership of the data and acknowledges NEPSE as its sole source.
 - The archive, formatting and pipeline code in this repository is the work of the
-  repository author.
+  repository author and is licensed to the public under the **MIT License**
+  (see [`LICENSE`](LICENSE)). The license covers **code only** — the market data
+  files under `Floorsheet/` and `Summary/` are published as factual information
+  and are not re-licensed; the attribution terms of this notice govern them.
 - "NEPSE" and related names and marks are used **nominatively** — solely to identify the
   data source — and remain the property of their owner.
 
