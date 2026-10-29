@@ -170,3 +170,14 @@ python scrape_daily.py
 ```
 
 The CSV will be generated inside the `Floorsheet/` directory with today's date.
+
+---
+
+## 📄 Data Notice & Attribution
+
+- All data here originates from the **complete daily floorsheet published publicly by the
+  Nepal Stock Exchange (NEPSE)** — [nepalstock.com.np](https://www.nepalstock.com.np/).
+  Underlying market data remains © NEPSE; this archive claims no ownership.
+- Independent open-source project — **not** affiliated with, endorsed by, or authorized by
+  NEPSE, SEBON, or any broker. Names are used nominatively, to identify the data source only.
+- Full details — source, purpose, removal/correction requests — in [`NOTICE.md`](NOTICE.md).
