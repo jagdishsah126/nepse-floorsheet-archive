@@ -19,15 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-SCOPE OF THIS LICENSE — please also read [NOTICE.md](NOTICE.md):
-
-This MIT license applies to the **source code** in this repository (the NEPSE
-scraper, summary tools and pipeline automation).
-
-It does **not** grant or imply any ownership of, or license to, the market data
-files under `Floorsheet/` and `Summary/`. Factual transaction data published by
-the Nepal Stock Exchange (NEPSE) is not copyrighted by this repository and
-carries only the attribution terms stated in `NOTICE.md`.
