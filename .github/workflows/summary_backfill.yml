@@ -1,0 +1,69 @@
+name: Summary Backfill
+
+on:
+  workflow_dispatch:
+    # Manual trigger only — one-off backfill of Summary/ for past Floorsheet days
+    inputs:
+      start_date:
+        description: "Only process Floorsheet dates ≥ this (YYYY-MM-DD, blank = all)"
+        required: false
+        default: ""
+      end_date:
+        description: "Only process Floorsheet dates ≤ this (YYYY-MM-DD, blank = all)"
+        required: false
+        default: ""
+      limit:
+        description: "Max days to process per run (blank = all missing)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: summary-backfill
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 🧮 Backfill Broker Summaries
+        env:
+          START_DATE: ${{ github.event.inputs.start_date }}
+          END_DATE: ${{ github.event.inputs.end_date }}
+          LIMIT: ${{ github.event.inputs.limit }}
+        run: |
+          ARGS=""
+          if [ -n "$START_DATE" ]; then ARGS="$ARGS --start $START_DATE"; fi
+          if [ -n "$END_DATE" ]; then ARGS="$ARGS --end $END_DATE"; fi
+          if [ -n "$LIMIT" ]; then ARGS="$ARGS --limit $LIMIT"; fi
+          python summaryBackfill.py $ARGS
+
+      - name: 🚀 Commit and Push
+        run: |
+          git config --local user.email "foreverzaraa@gmail.com"
+          git config --local user.name "Your Zara"
+
+          git add Summary/
+
+          if git diff --staged --quiet; then
+            echo "ℹ️ No new summary data to commit."
+          else
+            N=$(git diff --staged --name-only | wc -l)
+            FIRST=$(git diff --staged --name-only | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}' | sort | head -1)
+            LAST=$(git diff --staged --name-only | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}' | sort | tail -1)
+            git commit -m "📈 Broker summary backfill: ${FIRST} → ${LAST} (${N} files) [skip ci]"
+            git push
+            echo "✅ Committed and pushed ${N} summary file(s) for ${FIRST} → ${LAST}!"
+          fi
