@@ -280,20 +280,22 @@ $$\text{payload\_id} = i + (\text{salt}[\text{idx}] \times \text{day}) - \text{s
 
 ## Act 4: How We Solved It (The Engineering Implementation)
 
-Once the mathematical foundations were proven, we built an end-to-end software package in [`Scrapee/`](file:///home/jagdish/Desktop/Sandbox/Scrapee):
+Once the mathematical foundations were proven, we built an end-to-end package and
+published it as this repository. Live in the repo today:
 
 ```
-Scrapee/
-├── nepse_auth.py       # Math engine: token de-obfuscation & payload calculation
-├── nepse_client.py     # HTTP client: session management, auto-reauth, pagination
-├── cli.py              # CLI tool: scrape, filter, export, generate live curl
-├── scraper.js          # Zero-dependency Node.js equivalent
-├── requirements.txt    # Minimal dependencies (requests, pytz, pandas)
-├── README.md           # Quickstart and usage guide
-├── explain.md          # Technical analysis & FAQ
-├── Plan.md             # Blueprint for Project BOLT (Hybrid TMS execution)
-└── ReverseEngineering.md # Complete investigative report
+nepse-floorsheet-archive/
+├── nepse_auth.py         # Math engine: token de-obfuscation & payload calculation
+├── nepse_client.py       # HTTP client: session management, auto-reauth, pagination
+├── scrape_daily.py       # Daily entry point run by the scheduled GitHub Action
+├── DailySummary.py       # Floorsheet → per-broker Summary/ files (stdlib only)
+├── summaryBackfill.py    # Bulk regeneration of Summary/ for past days
+├── requirements.txt      # Scraper dependencies (requests, pytz, pandas)
+└── .github/workflows/    # daily_scrape.yml + summary_backfill.yml (automation)
 ```
+
+(The original prototype's extras — `cli.py`, `scraper.js` and prototype notes —
+were not carried over into this repository.)
 
 ### Key Engineering Features:
 1. **Zero Browser Dependency**: No Selenium, Puppeteer, or Chromium binaries required. The entire pipeline runs via lightweight HTTP requests.
@@ -325,8 +327,8 @@ Running `python3 cli.py --pages 1 --size 5` yielded immediate success:
 
 ### Test 2: GitHub Actions Cloud Deployment
 We packaged the solution into a dedicated GitHub repository ([`jagdishsah126/nepse-floorsheet-archive`](https://github.com/jagdishsah126/nepse-floorsheet-archive)) with a scheduled workflow:
-- **Trigger**: Every trading day (Sunday–Thursday) at **3:36 PM NPT** (09:51 UTC).
-- **Behavior**: Scrapes all transactions of the day, generates `Floorsheet/<YYYY-MM-DD>.csv`, and commits the file back to the repository.
+- **Trigger**: Every trading day at **3:36 PM NPT** (`51 9 * * 1-5` — Monday–Friday; the original Sun–Thu schedule was retired when NEPSE switched its trading week to Mon–Fri in April 2026).
+- **Behavior**: Scrapes all transactions of the day, generates `Floorsheet/<YYYY-MM-DD>.csv`, derives the two per-broker `Summary/` files via `DailySummary.py`, and commits the files back to the repository.
 
 ---
 

@@ -54,6 +54,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         action="store_true",
         help="List missing dates and exit without writing anything.",
     )
+    parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="Exit with a non-zero status if any day failed to process.",
+    )
     return parser.parse_args(argv)
 
 
@@ -155,6 +160,9 @@ def main(argv: list[str] | None = None) -> int:
     print(f"done: {processed:,} day(s) processed, {len(failures)} failure(s)")
     if failures:
         print("failed dates (rerun to retry): " + ", ".join(failures), file=sys.stderr)
+    if args.strict and failures:
+        print("strict mode: exiting non-zero due to failed day(s)", file=sys.stderr)
+        return 1
     return 0
 
 

@@ -34,24 +34,6 @@ jobs:
         run: |
           python scrape_daily.py
 
-      - name: 🚀 Commit and Push Floorsheet
-        run: |
-          git config --local user.email "foreverzaraa@gmail.com"
-          git config --local user.name "Your Zara"
-          
-          # Stage new files in Floorsheet/
-          git add Floorsheet/
-          
-          # Check if there are changes staged
-          if git diff --staged --quiet; then
-            echo "ℹ️ No new floorsheet data to commit for today."
-          else
-            TODAY=$(TZ="Asia/Kathmandu" date +'%Y-%m-%d')
-            git commit -m "📊 Daily Floorsheet Backup: ${TODAY} 🚀 [skip ci]"
-            git push
-            echo "✅ Successfully committed and pushed today's floorsheet!"
-          fi
-
       - name: 🧾 Build Broker Summary
         run: |
           TODAY=$(TZ="Asia/Kathmandu" date +'%Y-%m-%d')
@@ -61,17 +43,21 @@ jobs:
             echo "ℹ️ No floorsheet for ${TODAY}; skipping broker summary."
           fi
 
-      - name: 🚀 Commit and Push Summary
+      - name: 🚀 Commit and Push Floorsheet + Summary
         run: |
-          # Stage generated broker summaries
-          git add Summary/
+          git config --local user.email "foreverzaraa@gmail.com"
+          git config --local user.name "Your Zara"
+
+          # Single atomic commit per day: floorsheet + its broker summaries together,
+          # so one push failure can never leave a day in a partial state.
+          git add Floorsheet/ Summary/
 
           if git diff --staged --quiet; then
-            echo "ℹ️ No new broker summary data to commit for today."
+            echo "ℹ️ No new data to commit for today."
           else
             TODAY=$(TZ="Asia/Kathmandu" date +'%Y-%m-%d')
-            git commit -m "📈 Daily Broker Summary: ${TODAY} [skip ci]"
+            git commit -m "📊 NEPSE Floorsheet + Broker Summary: ${TODAY} 🚀 [skip ci]"
             git push
-            echo "✅ Successfully committed and pushed today's broker summary!"
+            echo "✅ Successfully committed and pushed today's floorsheet & summary!"
           fi
 

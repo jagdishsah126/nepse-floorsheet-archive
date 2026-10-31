@@ -60,3 +60,8 @@ python3 DailySummary.py --broker 58
 
 The script is stdlib-only and never downloads anything. Each day adds two new
 files; existing days are never rewritten unless `--force` is passed.
+
+Many missing days at once? `summaryBackfill.py` walks every Floorsheet date
+lacking a pair (`--dry-run`, `--start/--end`, `--limit N`, `--strict`), and the
+**Summary Backfill** workflow in `.github/workflows/summary_backfill.yml` runs it
+on GitHub Actions — no local downloads required.

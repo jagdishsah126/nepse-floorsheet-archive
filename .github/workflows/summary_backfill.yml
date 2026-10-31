@@ -40,9 +40,9 @@ jobs:
 
       - name: 🧮 Backfill Broker Summaries
         env:
-          START_DATE: ${{ github.event.inputs.start_date }}
-          END_DATE: ${{ github.event.inputs.end_date }}
-          LIMIT: ${{ github.event.inputs.limit }}
+          START_DATE: ${{ inputs.start_date }}
+          END_DATE: ${{ inputs.end_date }}
+          LIMIT: ${{ inputs.limit }}
         run: |
           ARGS=""
           if [ -n "$START_DATE" ]; then ARGS="$ARGS --start $START_DATE"; fi

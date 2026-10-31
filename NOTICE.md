@@ -16,7 +16,22 @@ Limited (NEPSE) publishes publicly on its own website**:
 - Retrieval method: automated, polite, once-per-trading-day retrieval (see
   [`ReverseEngineering.md`](ReverseEngineering.md) for the technical context)
 
-No data here is fabricated, estimated or combined from third-party vendors.
+How the full 2025-to-present record was assembled:
+
+- Trading days covered by this repository's own automation (from 2026-09-17 onward,
+  plus every day since) are retrieved directly from NEPSE as above.
+- Trading days the automation did not see — all of 2025 and a few later gap days,
+  through **2026-10-12** — were **backfilled** from SocrateAI's MIT-licensed
+  [`nepse-open-data`](https://github.com/socrateai-official/nepse-open-data) mirror of
+  NEPSE's floorsheets, remapped to this archive's schema; provenance details are in
+  [`credit.md`](credit.md).
+- One contract record (2026-04-29) reached all third-party copies with invalid zero
+  values; it was restored by reconciliation against MeroLagani's published official
+  daily totals. Every such repair is documented in [`credit.md`](credit.md).
+
+No record in this repository is fabricated: every row originates from NEPSE's
+floorsheet (directly or via the mirror above), and every repair against a secondary
+source is disclosed here and in [`credit.md`](credit.md).
 
 ## 2. Ownership & Attribution
 
