@@ -48,7 +48,7 @@ jobs:
           else
             echo "ℹ️ No newly scraped floorsheet in this run; checking if today's summary is pending..."
             TODAY=$(TZ="Asia/Kathmandu" date +'%Y-%m-%d')
-            if [ -f "Floorsheet/${TODAY}.csv" ] && [ ! -d "Summary/Broker/${TODAY}" ]; then
+            if [ -f "Floorsheet/${TODAY}.csv" ] && [ ! -f "Summary/${TODAY}_brokers.csv" ]; then
               python DailySummary.py --date "${TODAY}"
             else
               echo "ℹ️ Skipping broker summary: floorsheet not present or summary already built."
