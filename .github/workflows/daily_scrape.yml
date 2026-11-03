@@ -2,9 +2,13 @@ name: Daily NEPSE Floorsheet Scraper
 
 on:
   schedule:
-    # 09:51 UTC corresponds to 15:36 NPT (Nepal Time = UTC + 5:45)
-    # Runs monday to friday (1-5), the official NEPSE trading days
+    # Runs Monday to Friday (1-5), the official NEPSE trading days
+    # Primary: 09:51 UTC corresponds to 15:36 NPT (10 min after 15:00 market close settlement)
     - cron: '51 9 * * 1-5'
+    # Fallback 1: 12:51 UTC corresponds to 18:36 NPT (+3h catch-up if GitHub scheduler delayed)
+    - cron: '51 12 * * 1-5'
+    # Fallback 2: 15:51 UTC corresponds to 21:36 NPT (+6h late catch-up before midnight)
+    - cron: '51 15 * * 1-5'
   workflow_dispatch:
     # Allows manual trigger anytime from GitHub Actions tab
 
@@ -31,16 +35,24 @@ jobs:
           pip install -r requirements.txt
 
       - name: 📊 Execute Daily Scraper
+        id: scraper
         run: |
           python scrape_daily.py
 
       - name: 🧾 Build Broker Summary
         run: |
-          TODAY=$(TZ="Asia/Kathmandu" date +'%Y-%m-%d')
-          if [ -f "Floorsheet/${TODAY}.csv" ]; then
-            python DailySummary.py --date "${TODAY}"
+          SCRAPED_DATE="${{ steps.scraper.outputs.scraped_date }}"
+          if [ -n "${SCRAPED_DATE}" ] && [ -f "Floorsheet/${SCRAPED_DATE}.csv" ]; then
+            echo "📊 Generating broker summary for ${SCRAPED_DATE}..."
+            python DailySummary.py --date "${SCRAPED_DATE}"
           else
-            echo "ℹ️ No floorsheet for ${TODAY}; skipping broker summary."
+            echo "ℹ️ No newly scraped floorsheet in this run; checking if today's summary is pending..."
+            TODAY=$(TZ="Asia/Kathmandu" date +'%Y-%m-%d')
+            if [ -f "Floorsheet/${TODAY}.csv" ] && [ ! -d "Summary/Broker/${TODAY}" ]; then
+              python DailySummary.py --date "${TODAY}"
+            else
+              echo "ℹ️ Skipping broker summary: floorsheet not present or summary already built."
+            fi
           fi
 
       - name: 🚀 Commit and Push Floorsheet + Summary
@@ -55,9 +67,11 @@ jobs:
           if git diff --staged --quiet; then
             echo "ℹ️ No new data to commit for today."
           else
-            TODAY=$(TZ="Asia/Kathmandu" date +'%Y-%m-%d')
-            git commit -m "📊 NEPSE Floorsheet + Broker Summary: ${TODAY} 🚀 [skip ci]"
+            TARGET_DATE="${{ steps.scraper.outputs.scraped_date }}"
+            if [ -z "${TARGET_DATE}" ]; then
+              TARGET_DATE=$(TZ="Asia/Kathmandu" date +'%Y-%m-%d')
+            fi
+            git commit -m "📊 NEPSE Floorsheet + Broker Summary: ${TARGET_DATE} 🚀 [skip ci]"
             git push
-            echo "✅ Successfully committed and pushed today's floorsheet & summary!"
+            echo "✅ Successfully committed and pushed floorsheet & summary for ${TARGET_DATE}!"
           fi
-
