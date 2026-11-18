@@ -7,7 +7,8 @@ nepse-floorsheet-archive/
 ├── .github/
 │   └── workflows/
 │       ├── daily_scrape.yml        # Mon–Fri 15:36 NPT: scrape + commit floorsheet & summaries
-│       └── summary_backfill.yml    # manual dispatch: fill missing Summary/ days
+│       ├── summary_backfill.yml    # manual dispatch: fill missing Summary/ days
+│       └── verify.yml              # manual dispatch: verify against Chukul & internal math
 ├── Floorsheet/                     # YYYY-MM-DD.csv — one file per trading day (2025-01-01 →)
 ├── Summary/                        # <date>_brokers.csv + <date>_broker_totals.csv per day
 │   └── README.md                   # Summary schema & sign conventions
@@ -16,6 +17,7 @@ nepse-floorsheet-archive/
 ├── scrape_daily.py                 # Entry point — orchestrates the daily scrape
 ├── DailySummary.py                 # Floorsheet → per-broker Summary files (stdlib only)
 ├── summaryBackfill.py              # Bulk regeneration of Summary/ for missing days
+├── Verify.py                       # Two-stage verification engine (Chukul API & Summary math)
 ├── requirements.txt                # Python dependencies (scraper only)
 ├── .gitignore                      # Standard Python ignores + *.tmp
 ├── README.md                       # Project documentation

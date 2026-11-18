@@ -1,0 +1,87 @@
+name: Verify Archive (Chukul & Summary)
+
+on:
+  workflow_dispatch:
+    inputs:
+      step:
+        description: "Verification Step ('both', '1'=Chukul, '2'=Summary)"
+        type: choice
+        options:
+          - both
+          - "1"
+          - "2"
+        default: both
+      scope:
+        description: "Date Scope ('last_6_months', 'all', 'single_date', 'custom_range')"
+        type: choice
+        options:
+          - last_6_months
+          - all
+          - single_date
+          - custom_range
+        default: last_6_months
+      date:
+        description: "Single date if scope=single_date (YYYY-MM-DD)"
+        required: false
+        default: ""
+      start_date:
+        description: "Start date if scope=custom_range (YYYY-MM-DD)"
+        required: false
+        default: ""
+      end_date:
+        description: "End date if scope=custom_range (YYYY-MM-DD)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 🔍 Execute Verification
+        env:
+          STEP: ${{ inputs.step }}
+          SCOPE: ${{ inputs.scope }}
+          SINGLE_DATE: ${{ inputs.date }}
+          START_DATE: ${{ inputs.start_date }}
+          END_DATE: ${{ inputs.end_date }}
+        run: |
+          ARGS="--non-interactive --step $STEP --output verification-report.json"
+          
+          if [ "$SCOPE" = "single_date" ]; then
+            if [ -n "$SINGLE_DATE" ]; then
+              ARGS="$ARGS --date $SINGLE_DATE"
+            fi
+          elif [ "$SCOPE" = "custom_range" ]; then
+            if [ -n "$START_DATE" ]; then ARGS="$ARGS --start $START_DATE"; fi
+            if [ -n "$END_DATE" ]; then ARGS="$ARGS --end $END_DATE"; fi
+          elif [ "$SCOPE" = "all" ]; then
+            ARGS="$ARGS --all"
+          else
+            # Default: last_6_months
+            SIX_MONTHS_AGO=$(python -c "from datetime import datetime, timedelta; print((datetime.now() - timedelta(days=182)).strftime('%Y-%m-%d'))")
+            ARGS="$ARGS --start $SIX_MONTHS_AGO"
+          fi
+
+          echo "Running: python Verify.py $ARGS"
+          python Verify.py $ARGS
+
+      - name: 📤 Upload Verification Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verification-report
+          path: verification-report.json
+          if-no-files-found: ignore
